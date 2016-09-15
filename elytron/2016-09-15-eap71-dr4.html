@@ -23,11 +23,106 @@ class: center, middle
 
 # WildFly Elytron
 
-## https://github.com/wildfly-security/wildfly-elytron
+## &amp; Elytron Subsystem
+
+### https://github.com/wildfly-security/
+
+---
+# Elytron
+
+* highly modular architecture
+* utilizes [capabilities and requirements](https://docs.jboss.org/author/display/WFLY10/Working+with+WildFly+Capabilities)
 
 ---
 
-# // TBD
+# Done in EAP 7.1 DR4
+
+* Undertow
+* EJB
+* TLS configuration
+
+## Test it
+
+```bash
+standalone.sh -c standalone-elytron.xml
+```
+
+???
+
+EJBs without remoting
+
+---
+# Painpoints
+
+* Complexity
+* Domain model stability
+* User eXperience
+* Documentation
+
+
+???
+
+* XSD contains 3k of lines.
+* demand for simple attribute types instead of object types (HAL)
+* UX - let's say "not optimal"
+---
+
+# Documentation
+
+**Not Yet** *(sufficient)*
+
+* own section in [WildFly documentation](https://docs.jboss.org/author/display/WFLY/WildFly+Elytron+Security)
+* some blog entries on several places
+
+---
+
+# Elytron Creaper commands
+https://github.com/jboss-security-qe/creaper/tree/elytron
+
+## Work In Progress
+* low-level commands
+
+## Near future
+* simple commands for complex scenarios
+
+---
+
+class: center, middle
+
+# **Share**  your usecases for **scenarios-level** commands!
+
+---
+
+# Elytron integration - Near future
+* Remoting
+* [Management interfaces](https://developer.jboss.org/wiki/EnablingWildFlyElytronForManagementSecurity)
+* [Credential store](http://undertheelytron.blogspot.cz/2016/09/introduction-to-credential-store-spi-in.html)
+* clean-up &amp; 
+* make Elytron the default security provider in WildFly
+* other subsystems integration
+  * [Web services](https://jimma.github.io/2016/08/24/Wildfly-Elytron-and-Webservice/), Remoting in "Analysis Dev"
+  * JMS
+
+* Some already existing parts can disappear
+
+???
+
+* FileSystemRealm - not yet decided how to handle it in 7.1
+
+---
+
+class: center, middle
+
+# Demo time!
+
+---
+
+# Action items for YOU!
+
+* check status of **integration to your component**
+  * e.g. if it utilizes SSL/TLS
+* **share scenarios** for Creaper commands
+  * https://github.com/jboss-security-qe/creaper/issues
 
 ---
 class: center, middle
