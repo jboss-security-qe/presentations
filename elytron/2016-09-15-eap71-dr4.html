@@ -111,12 +111,68 @@ class: center, middle
 ???
 
 * FileSystemRealm - not yet decided how to handle it in 7.1
-
 ---
-
+# TLS
+* By now every subsystem initialised SSL context own way.
+* In Elytron SSL Context configuration is centralized.
+* SSL capability *org.wildfly.security.ssl-context*
+```
+/subsystem=elytron/server-ssl-context=server:read-resource-description()
+```
+* Should be possible to reference in subsystems
+```
+/subsystem=undertow/server=default-server/https-listener=https:read-resource-description()
+```
+* Should be possible to reference elytron *ssl-context* and provide authentication by legacy security solution
+---
 class: center, middle
 
 # Demo time!
+
+---
+# TLS Demo 1/2
+
+* Generate private key of server
+```
+keytool -genkeypair \
+  -keystore server.jks \
+  -alias server \
+  -keyalg RSA \
+  -keysize 3072 \
+  -validity 36500 \
+  -storepass password \
+  -keypass password \
+  -dname "CN=localhost, OU=EAP QE, O=RedHat, L=Brno, ST=Czech Republic, C=CZ" \
+  -ext SAN="DNS:localhost,DNS:localhost.localdomain"
+```
+
+* Configure keystore
+```
+/subsystem=elytron/key-store=server:add(type=jks, path=server.jks,password=password)
+```
+* Configure key-manager
+```
+/subsystem=elytron/key-managers=server:add(algorithm=SunX509, key-store=server, \
+password=password)
+```
+---
+# TLS Demo 2/2
+* Configure ssl context
+```
+/subsystem=elytron/server-ssl-context=server:add(key-managers=server, \
+protocols=[TLSv1_2])
+```
+* Configure undertow
+  * remove default https
+```
+/subsystem=undertow/server=default-server/https-listener=https:remove()
+```
+  * set elytron ssl context
+```
+/subsystem=undertow/server=default-server/https-listener=https:add( \
+ssl-context=server, socket-binding=https, enable-http2=false)
+```
+* Effectivelly emulating java programming approach http://www.programcreek.com/java-api-examples/javax.net.ssl.SSLContext
 
 ---
 
