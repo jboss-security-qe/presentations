@@ -44,7 +44,10 @@ class: center, middle
 ## Test it
 
 ```bash
-standalone.sh -c standalone-elytron.xml
+jboss-eap-7.1/bin/standalone.sh -c standalone-elytron.xml
+jboss-eap-7.1/bin/add-user.sh -a -u admin -p password1! -r ApplicationRealm -g Admin
+jboss-eap-7.1/bin/jboss-cli.sh -c "deploy secured-webapp.war"
+curl -v -u admin:password1! http://localhost:8080/secured-webapp/
 ```
 
 ???
