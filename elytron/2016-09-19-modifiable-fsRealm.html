@@ -21,21 +21,47 @@
 
 class: center, middle
 
-# Modifiable file-system realm
+# Modifiable FileSystem Realm
 
 ## in WildFly Elytron
+
+and [JBoss CLI demo](cli/modifiable-fsRealm.cli)
 
 ---
 # Security Realms
 
-// TODO
+* provide access to the underlying repository of identities
+* used for obtaining credentials
+  * allows authentication mechanisms to perform verification
 
 ---
 
 # FileSystem Realm
 
-// TODO
+* native Elytron implementation of Security Realm
+* **modifiable** identities repository
+  * XML file per identity
+  * directory structure  with configurable depth
 
+
+--
+
+### Example
+```
+cat standalone/configuration/fs-realm/a/d/admin.xml
+```
+
+```xml
+<identity xmlns="urn:elytron:1.0">
+    <credentials>
+        <password algorithm="clear" format="base64">AWFkbWluLjEyMzRl</password>
+    </credentials>
+    <attributes>
+        <attribute name="Roles" value="Admin"/>
+        <attribute name="Roles" value="User"/>
+    </attributes>
+</identity>
+```
 ---
 
 # Add Elytron Extension &amp; Subsystem
