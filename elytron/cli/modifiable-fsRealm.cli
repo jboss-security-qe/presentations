@@ -1,0 +1,50 @@
+# Add Elytron extension & subsystem
+/extension=org.wildfly.extension.elytron:add
+/subsystem=elytron:add
+reload
+
+# Add FileSystem (FS) security realm
+/subsystem=elytron/filesystem-realm=fsRealm:add(path="fs-realm", relative-to="jboss.server.config.dir")
+
+# We don not need add-user.sh tool!
+# Modifications are done through management operations
+/subsystem=elytron/filesystem-realm=fsRealm/identity=admin:add()
+/subsystem=elytron/filesystem-realm=fsRealm/identity=admin:set-password(clear={password="admin.1234e"})
+/subsystem=elytron/filesystem-realm=fsRealm/identity=admin:add-attribute(name=Roles, value=["Admin","User"])
+/subsystem=elytron/filesystem-realm=fsRealm/identity=user:add()
+/subsystem=elytron/filesystem-realm=fsRealm/identity=user:set-password(clear={password="user.1234e"})
+/subsystem=elytron/filesystem-realm=fsRealm/identity=user:add-attribute(name=Roles, value=["User"])
+
+# We can read roles from user attribute (stored in FS realm)
+/subsystem=elytron/simple-role-decoder=from-roles-attribute:add(attribute=Roles)
+
+# only users which has User role can login
+/subsystem=elytron/simple-permission-mapper=login-permission-mapper:add( \
+   permission-mappings=[ \
+      {permissions=[ \
+         {class-name="org.wildfly.security.auth.permission.LoginPermission"}], \
+      roles=["User"]}])
+
+# Security domain with the FS realm
+/subsystem=elytron/security-domain=testdomain:add( \
+   default-realm=fsRealm, \
+   realms=[{realm=fsRealm, role-decoder=from-roles-attribute}], \
+   permission-mapper=login-permission-mapper)
+
+# HTTP server mechanism factory
+/subsystem=elytron/provider-http-server-mechanism-factory=global:add
+
+# HTTP authentication factory
+/subsystem=elytron/http-authentication-factory=testdomain-authentication:add( \
+   http-server-mechanism-factory=global, security-domain=testdomain, \
+   mechanism-configurations=[ \
+     {mechanism-name=BASIC} \
+   ])
+
+# Security domain mapping in Undertow
+/subsystem=undertow/application-security-domain=web-tests:add(http-authentication-factory=testdomain-authentication)
+
+reload
+
+# deploy test application (security constraints requires Admin role for access)
+deploy /tmp/secured-webapp.war

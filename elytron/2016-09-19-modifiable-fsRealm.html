@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WildFly Elytron - Modifiable realm</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }      
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Modifiable file-system realm
+
+## in WildFly Elytron
+
+---
+# Security Realms
+
+// TODO
+
+---
+
+# FileSystem Realm
+
+// TODO
+
+---
+
+# Add Elytron Extension &amp; Subsystem
+
+```
+/extension=org.wildfly.extension.elytron:add
+/subsystem=elytron:add
+reload
+```
+---
+# Add FileSystem Realm
+
+```
+/subsystem=elytron/filesystem-realm=fsRealm:add( \
+  path="fs-realm", relative-to="jboss.server.config.dir")
+```
+--
+## Modify it through management operations
+*No need of add-user.sh tool!*
+
+```
+/subsystem=elytron/filesystem-realm=fsRealm/identity=admin:add()
+/subsystem=elytron/filesystem-realm=fsRealm/identity=admin:set-password( \
+  clear={password="admin.1234e"})
+/subsystem=elytron/filesystem-realm=fsRealm/identity=admin:add-attribute( \
+  name=Roles, value=["Admin","User"])
+/subsystem=elytron/filesystem-realm=fsRealm/identity=user:add()
+/subsystem=elytron/filesystem-realm=fsRealm/identity=user:set-password( \
+  clear={password="user.1234e"})
+/subsystem=elytron/filesystem-realm=fsRealm/identity=user:add-attribute( \
+  name=Roles, value=["User"])
+```
+---
+# Read roles from user attribute
+
+```
+/subsystem=elytron/simple-role-decoder=from-roles-attribute:add(attribute=Roles)
+```
+???
+* Attributes are stored in the file-system realm
+--
+
+# Users which has User role can login
+
+```
+/subsystem=elytron/simple-permission-mapper=login-permission-mapper:add( \
+   permission-mappings=[ \
+      {permissions=[ \
+         {class-name="org.wildfly.security.auth.permission.LoginPermission"}], \
+      roles=["User"]}])
+```
+
+---
+
+# Security domain with the filesystem realm
+
+```
+/subsystem=elytron/security-domain=testdomain:add( \
+   default-realm=fsRealm, \
+   realms=[{realm=fsRealm, role-decoder=from-roles-attribute}], \
+   permission-mapper=login-permission-mapper)
+```
+
+---
+
+# Use it in Undertow
+
+--
+### HTTP server mechanism factory
+```
+/subsystem=elytron/provider-http-server-mechanism-factory=global:add
+```
+--
+### HTTP authentication factory
+```
+/subsystem=elytron/http-authentication-factory=testdomain-authentication:add( \
+   http-server-mechanism-factory=global, security-domain=testdomain, \
+   mechanism-configurations=[ \
+     {mechanism-name=BASIC} \
+   ])
+```
+--
+## Domain mapping in Undertow subsystem
+```
+/subsystem=undertow/application-security-domain=web-tests:add( \
+  http-authentication-factory=testdomain-authentication)
+reload
+```
+---
+class: center, middle
+
+# Questions?
+
+    </textarea>
+    <script src="remark-0.13.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
