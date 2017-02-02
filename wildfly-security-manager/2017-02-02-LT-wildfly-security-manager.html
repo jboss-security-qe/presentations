@@ -23,11 +23,13 @@ class: center, middle
 
 # WildFly Security Manager
 
-## in JBoss EAP 7+
+## in WildFly 10+ / JBoss EAP 7+
 
 ---
 
-## Run WildFly/EAP with security manager
+## Run WildFly/EAP with Security Manager
+
+The **`-secmgr`** argument of `jboss-modules.jar` enables the Security Manager.
 
 ```bash
 bin/standalone.sh -secmgr
@@ -38,6 +40,10 @@ bin/domain.sh -secmgr
 # - appclient
 # - ...
 ```
+
+--
+
+
 
 --
 
@@ -55,20 +61,20 @@ bin/domain.sh -secmgr
 --
 
 ### AS modules
-* permissions granting based on `<permissions/>` element in `modules.xml`
+* permissions granting based on `<permissions/>` element in `module.xml`
 * `AllPermission` by default (missing `<permissions/>`)
 
 --
 
-### deployments
+### Deployments
 
-* based on JEE 7 platform specification (JSR-342)
-* granting based on entries in `META-INF/permissions.xml` (in deployment)
+* behavior specified by JEE 7 platform specification (JSR-342)
+* permissions granting based on entries in `META-INF/permissions.xml` (in deployment)
 * no permissions granted by default
 
 ---
 
-## module.xml with permissions
+## Example - `module.xml` with permissions
 
 ```xml
 <module xmlns="urn:jboss:module:1.2" name="org.jboss.test.secman.limited">
@@ -89,7 +95,7 @@ bin/domain.sh -secmgr
 
 ---
 
-## META-INF/permissions.xml
+## Example - `META-INF/permissions.xml`
 
 * or vendor specific `META-INF/jboss-permissions.xml`
 
@@ -155,6 +161,13 @@ bin/domain.sh -secmgr
 * **always granted** permissions
 * deployments don't need to ask for them (in `permissions.xml`)
 
+---
+
+## WildFly Security Manager testing
+
+* `testsuite/integration/secman` in AS TS - always run with Security Manager
+* possibility to run whole AS TS with Security Manager enabled
+  * ongoing effort to place correct `permissions.xml` into test deployments
 
 ---
 
@@ -176,6 +189,11 @@ bin/domain.sh -secmgr
 ### Implementation - wildfly
 * module `security-manager` with extension and subsystem
   * deployment processor parses `permissions.xml` and fills PermissionFactories in `ModuleSpecification`
+
+
+### WildFly 11.x+ / EAP 7.1+
+
+* security-manager module moved to WildFly Core
 
 ---
 
